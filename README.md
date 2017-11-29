@@ -1,2 +1,2 @@
 # python-challenge
-homework assignment 2
+homework assignment 3
