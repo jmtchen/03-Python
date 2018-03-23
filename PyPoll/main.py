@@ -1,106 +1,92 @@
-import os
+# -*- coding: UTF-8 -*-
+"""PyPoll Homework"""
+
+# Incorporated the csv module
 import csv
 
-budget1 = os.path.join("raw_data","budget_data_1.csv")
-budget2 = os.path.join("raw_data","budget_data_2.csv")
-countmonth1 = []
-countmonth2 = []
-revenue1 = 0
-revenue2 = 0
-maxrevenue1 = 0
-maxrevenue2 = 0
-minrevenue1 = 0
-minrevenue2 = 0
-maxmonth1 = 0
-maxmonth2 = 0
-minmonth1 = 0
-minmonth2 = 0
+# Files to load and output (Remember to change these)
+file_to_load = "raw_data/election_data_2.csv"
+file_to_output = "analysis/election_analysis_2.txt"
 
-with open(budget1, newline="") as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=",")
-    next(csvfile)
+# Total Vote Counter
+total_votes = 0
+
+# Candidate Options and Vote Counters
+candidate_options = []
+candidate_votes = {}
+
+# Winning Candidate and Winning Count Tracker
+winning_candidate = ""
+winning_count = 0
+
+# Read the csv and convert it into a list of dictionaries
+with open(file_to_load) as election_data:
+    reader = csv.DictReader(election_data)
+
+    # For each row...
+    for row in reader:
+     
+        # Run the loader animation
+        print(". ", end=""),
     
-    for row in csvreader:
-        countmonth1.append(row[0])
-        revenue1 = int(revenue1) + int(row[1])
-        
-        if maxrevenue1 > int(row[1]):
-            maxrevenue1
-            maxmonth1
-        
-        else:
-            maxrevenue1 = int(row[1])
-            maxmonth1 = row[0]
-        
-        if minrevenue1 < int(row[1]):
-            minrevenue1
-            minmonth1
-        
-        else:
-            minrevenue1 = int(row[1])
-            minmonth1 = row[0]
+        # Add to the total vote count
+        total_votes = total_votes + 1
+     
+        # Extract the candidate name from each row
+        candidate_name = row["Candidate"]
+     
+        # If the candidate does not match any existing candidate...
+        # (In a way, our loop is "discovering" candidates as it goes)
+        if candidate_name not in candidate_options:
+     
+            # Add it to the list of candidates in the running
+            candidate_options.append(candidate_name)
+     
+            # And begin tracking that candidate's voter count
+            candidate_votes[candidate_name] = 0
+     
+        # Then add a vote to that candidate's count
+        candidate_votes[candidate_name] = candidate_votes[candidate_name] + 1
 
-    avg1 = revenue1 / int(len(countmonth1))
-        
-with open(budget2, newline="") as csvfile:
-    csvreader = csv.reader(csvfile, delimiter=",")
-    next(csvfile)
-    
-    for row in csvreader:
-        countmonth2.append(row[0])
-        revenue2 = int(revenue2) + int(row[1])
-        
-        if maxrevenue2 > int(row[1]):
-            maxrevenue2
-            maxmonth2
-        
-        else:
-            maxrevenue2 = int(row[1])
-            maxmonth2 = row[0]
-        
-        if minrevenue2 < int(row[1]):
-            minrevenue2
-            minmonth2
-        
-        else:
-            minrevenue2 = int(row[1])
-            minmonth2 = row[0]
+# Print the results and export the data to our text file
+with open(file_to_output, "w") as txt_file:
 
-    avg2 = revenue2 / int(len(countmonth1))
+    # Print the final vote count (to terminal)
+    election_results = (
+        f"\n\nElection Results\n"
+        f"-------------------------\n"
+        f"Total Votes: {total_votes}\n"
+        f"-------------------------\n")
+    print(election_results, end="")
 
-# Print analysis on terminal for file 1
-print("Financial Analysis for File 1")
-print("-----------------------------------------------")        
-print("Total Months: " + str(len(countmonth1)))
-print("Total Revenue: " + str(revenue1))
-print("Average Revenue Change: " + str(avg1))
-print("Greatest Increase in Revenue: " + str(maxrevenue1) + " ($" + str(maxmonth1) + ")")
-print("Greatest Decrease in Revenue: " + str(minrevenue1) + " ($"  + str(minmonth1) + ")")
+    # Save the final vote count to the text file
+    txt_file.write(election_results)
 
-# Print analysis on terminal for file 2
-print("")
-print("Financial Analysis for File 2")
-print("-----------------------------------------------")        
-print("Total Months: "  + str(len(countmonth2)))
-print("Total Revenue: "  + str(revenue2))
-print("Average Revenue Change: " + str(avg2))
-print("Greatest Increase in Revenue: " + str(maxrevenue2) + " ($" + str(maxmonth2) + ")")
-print("Greatest Decrease in Revenue: " + str(minrevenue2) + " ($"  + str(minmonth2) + ")")
+    # Determine the winner by looping through the counts
+    for candidate in candidate_votes:
 
-# Save output as text file
-with open('output.txt','w', newline = '') as outputfile:
-    print("Financial Analysis for File 1", file = outputfile)
-    print("-----------------------------------------------", file = outputfile)        
-    print("Total Months: "  + str(len(countmonth1)), file = outputfile)
-    print("Total Revenue: "  + str(revenue1), file = outputfile)
-    print("Average Revenue Change: " + str(avg1), file = outputfile)
-    print("Greatest Increase in Revenue: " + str(maxrevenue1) + " ($"  + str(maxmonth1) + ")", file = outputfile)
-    print("Greatest Decrease in Revenue: " + str(minrevenue1) + " ($"  + str(minmonth1) + ")", file = outputfile)
-    print("", file = outputfile)
-    print("Financial Analysis for File 2", file = outputfile)
-    print("-----------------------------------------------", file = outputfile)      
-    print("Total Months: "   + str(len(countmonth2)), file = outputfile)
-    print("Total Revenue: " + str(revenue2), file = outputfile)
-    print("Average Revenue Change: " + str(avg2), file = outputfile)
-    print("Greatest Increase in Revenue: " + str(maxrevenue2) + " ($"  + str(maxmonth2) + ")", file = outputfile)
-    print("Greatest Decrease in Revenue: " + str(minrevenue2) + " ($"  + str(minmonth2) + ")", file = outputfile) 
+        # Retrieve vote count and percentage
+        votes = candidate_votes.get(candidate)
+        vote_percentage = float(votes) / float(total_votes) * 100
+
+        # Determine winning vote count and candidate
+        if (votes > winning_count):
+            winning_count = votes
+            winning_candidate = candidate
+
+        # Print each candidate's voter count and percentage (to terminal)
+        voter_output = f"{candidate}: {vote_percentage:.3f}% ({votes})\n"
+        print(voter_output, end="")
+
+        # Save each candidate's voter count and percentage to text file
+        txt_file.write(voter_output)
+
+    # Print the winning candidate (to terminal)
+    winning_candidate_summary = (
+        f"-------------------------\n"
+        f"Winner: {winning_candidate}\n"
+        f"-------------------------\n")
+    print(winning_candidate_summary)
+
+    # Save the winning candidate's name to the text file
+    txt_file.write(winning_candidate_summary)
